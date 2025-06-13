@@ -13,7 +13,7 @@ struct ContentView: View {
     let tabItems: [TabItem] = [
         TabItem(iconName: "phone.fill", label: "Calls"),
         TabItem(iconName: "person.fill", label: "Contacts"),
-        TabItem(iconName: "dialpad.fill", label: "Keypad"),
+        TabItem(iconName: "entry.lever.keypad", label: "Keypad"),
         TabItem(iconName: "magnifyingglass", label: "Search")
     ]
 
@@ -53,8 +53,7 @@ struct ContentView: View {
         default:
             Text("Search Page")
         }
-        //.font(.largeTitle)
-        //.foregroundColor(.black)
+        
     }
 }
 
@@ -127,28 +126,40 @@ struct GlassmorphicBottomNavBar: View {
         }
     }
 
+    /// Updated pillIndicator to include icon + label
     private func pillIndicator(width: CGFloat, xOffset: CGFloat) -> some View {
-        RoundedRectangle(cornerRadius: 30)
-            .fill(Material.regularMaterial)
-            .stroke(Color.blue.opacity(0.3), lineWidth: 1)
-            .shadow(color: Color.blue.opacity(0.3), radius: 20, x: 0, y: 3)
-            .frame(width: width, height: pillHeight)
-            .offset(x: xOffset + dragOffset)
-            .scaleEffect(pillScale)
-            .gesture(
-                LongPressGesture(minimumDuration: 0.1)
-                    .onChanged { pressing in
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                            pillScale = pressing ? 1.1 : 1.0
-                        }
+        ZStack {
+            // Pill background
+            RoundedRectangle(cornerRadius: 30)
+                .fill(Material.regularMaterial)
+                .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                .shadow(color: Color.blue.opacity(0.3), radius: 20, x: 0, y: 3)
+                .frame(width: width, height: pillHeight)
+
+            // Icon + Label inside pill
+            VStack(spacing: 8) {
+                Image(systemName: tabItems[selectedIndex].iconName)
+                    .font(.system(size: 24))
+                Text(tabItems[selectedIndex].label)
+                    .font(.system(size: 14))
+            }
+            .foregroundColor(.black.opacity(0.7))
+        }
+        .offset(x: xOffset + dragOffset)
+        .scaleEffect(pillScale)
+        .gesture(
+            LongPressGesture(minimumDuration: 0.1)
+                .onChanged { pressing in
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                        pillScale = pressing ? 1.1 : 1.0
                     }
-            )
+                }
+        )
     }
 
     private func dragGesture(itemWidth: CGFloat) -> _EndedGesture<_ChangedGesture<DragGesture>> {
         DragGesture()
             .onChanged { val in
-                let maxDrag = itemWidth * CGFloat(tabItems.count - 1)
                 dragOffset = val.translation.width
                     .clamped(-CGFloat(selectedIndex) * itemWidth,
                              CGFloat(tabItems.count - 1 - selectedIndex) * itemWidth)
